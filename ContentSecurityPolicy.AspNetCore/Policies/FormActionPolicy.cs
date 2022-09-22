@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// form-action policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -16,15 +16,15 @@
 [AddUnsafeEval]
 [AddUnsafeHashes]
 [AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class FormActionPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// form-action policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("form-action")]
+public sealed partial class FormActionPolicy : PolicyBase
 {
 }

@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// connect-src policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -16,15 +16,15 @@
 [AddUnsafeEval]
 [AddUnsafeHashes]
 [AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class ConnectSrcPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// connect-src policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("connect-src")]
+public sealed partial class ConnectSrcPolicy : PolicyBase
 {
 }

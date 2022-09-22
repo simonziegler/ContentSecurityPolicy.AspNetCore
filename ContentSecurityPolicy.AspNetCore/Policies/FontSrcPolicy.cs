@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// font-src policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -16,15 +16,15 @@
 [AddUnsafeEval]
 [AddUnsafeHashes]
 [AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class FontSrcPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// font-src policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("font-src")]
+public sealed partial class FontSrcPolicy : PolicyBase
 {
 }

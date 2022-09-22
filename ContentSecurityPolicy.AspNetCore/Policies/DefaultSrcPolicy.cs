@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// default-src policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -16,15 +16,15 @@
 [AddUnsafeEval]
 [AddUnsafeHashes]
 [AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class DefaultSrcPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// default-src policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("default-src")]
+public sealed partial class DefaultSrcPolicy : PolicyBase
 {
 }

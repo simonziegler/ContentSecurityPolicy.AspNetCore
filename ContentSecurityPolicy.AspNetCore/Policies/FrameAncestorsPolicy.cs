@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// frame-ancestors policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -13,18 +13,16 @@
 [AddSelf]
 [AddSchemeSource]
 [AddStrictDynamic]
-[AddUnsafeEval]
 [AddUnsafeHashes]
-[AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class FrameAncestorsPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// frame-ancestors policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("frame-ancestors")]
+public sealed partial class FrameAncestorsPolicy : PolicyBase
 {
 }

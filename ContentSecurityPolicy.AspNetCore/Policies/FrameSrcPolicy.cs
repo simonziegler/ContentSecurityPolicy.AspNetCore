@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// child-src policy.
+/// frame-src policy.
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
@@ -16,15 +16,15 @@
 [AddUnsafeEval]
 [AddUnsafeHashes]
 [AddUnsafeInline]
-public sealed partial class ChildSrcPolicyOptions : PolicyOptionsBase
+public sealed partial class FrameSrcPolicyOptions : PolicyOptionsBase
 {
 }
 
 
 /// <summary>
-/// child-src policy.
+/// frame-src policy.
 /// </summary>
-[Policy("child-src")]
-public sealed partial class ChildSrcPolicy : PolicyBase
+[Policy("frame-src")]
+public sealed partial class FrameSrcPolicy : PolicyBase
 {
 }
