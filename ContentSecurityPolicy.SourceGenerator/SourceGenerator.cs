@@ -175,7 +175,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
         source.AppendLinesIndented(1, "/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the supplied value to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)} AddValue(string value, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)} AddValueIf(string value, Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, "return conditionalFunc.Invoke() ? AddValue(value) : this;");
         source.AppendLinesIndented(1, "}");
@@ -217,7 +217,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// </summary>");
         source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add {policyValue} to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}(Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}If(Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? {attributeName}() : this;");
         source.AppendLinesIndented(1, "}");
@@ -257,7 +257,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// </summary>");
         source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddHashValue(HashAlgorithm hashAlgorithm, string hashValue, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddHashValueIf(HashAlgorithm hashAlgorithm, string hashValue, Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddHashValue(hashAlgorithm, hashValue) : this;");
         source.AppendLinesIndented(1, "}");
@@ -297,7 +297,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// </summary>");
         source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddHostSource(string hostSourceValue, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddHostSourceIf(string hostSourceValue, Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddHostSource(hostSourceValue) : this;");
         source.AppendLinesIndented(1, "}");
@@ -337,7 +337,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// </summary>");
         source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddNonce(Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddNonceIf(Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddNonce() : this;");
         source.AppendLinesIndented(1, "}");
@@ -377,7 +377,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// </summary>");
         source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
         source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddSchemeSource(SchemeSource schemeSource, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddSchemeSourceIf(SchemeSource schemeSource, Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddSchemeSource(schemeSource) : this;");
         source.AppendLinesIndented(1, "}");
