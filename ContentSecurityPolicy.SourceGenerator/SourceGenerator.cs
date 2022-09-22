@@ -61,8 +61,16 @@ internal class SourceGenerator : ISourceGenerator
                 var codeAdded = false;
 
                 codeAdded = ProcessPolicyAttribute(compilation, classSymbol, codeAdded, source);
+                
                 codeAdded = ProcessPolicyOptionsAttribute(compilation, classSymbol, codeAdded, source);
+
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddNone", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddReportSample", codeAdded, source);
                 codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddStrictDynamic", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeEval", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeHashes", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeInline", codeAdded, source);
 
                 source.AppendLinesIndented(0, "}");
 
