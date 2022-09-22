@@ -5,7 +5,15 @@
 /// base-uri policy.
 /// </summary>
 [PolicyOptions]
+[AddHashValue]
+[AddHostSource]
+[AddNone]
+[AddNonce]
+[AddReportSample]
 [AddSelf]
+[AddSchemeSource]
+[AddUnsafeEval]
+[AddUnsafeHashes]
 public sealed partial class BaseUriPolicyOptions : PolicyOptionsBase
 {
 }

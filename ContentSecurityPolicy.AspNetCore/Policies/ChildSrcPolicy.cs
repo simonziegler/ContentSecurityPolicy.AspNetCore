@@ -6,10 +6,12 @@
 /// </summary>
 [PolicyOptions]
 [AddHashValue]
+[AddHostSource]
 [AddNone]
 [AddNonce]
 [AddReportSample]
 [AddSelf]
+[AddSchemeSource]
 [AddStrictDynamic]
 [AddUnsafeEval]
 [AddUnsafeHashes]
