@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Vectis.SourceGenerator;
+namespace ContentSecurityPolicy.AspNetCore;
 
 [Generator]
 internal class SourceGenerator : ISourceGenerator
@@ -49,15 +49,27 @@ internal class SourceGenerator : ISourceGenerator
 
             try
             {
-                StringBuilder source = new();
-
-                var codeAdded = false;
-
-                codeAdded = ProcessAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
-
-                if (codeAdded)
+                if (classSymbol.BaseType != null && GetClassBaseTypeName(classSymbol) == "PolicyOptionsBase")
                 {
-                    context.AddSource($"{GetClassTypeName(classSymbol, true)}.AddedFunctions.g.cs", source.ToString());
+                    StringBuilder source = new();
+
+                    source.AppendLinesIndented(0, "using System;");
+                    source.AppendLinesIndented(0, "");
+                    source.AppendLinesIndented(0, $"namespace ContentSecurityPolicy.AspNetCore;");
+                    source.AppendLinesIndented(0, "");
+                    source.AppendLinesIndented(0, $"public sealed partial class {GetClassTypeName(classSymbol)} : PolicyOptionsBase");
+                    source.AppendLinesIndented(0, "{");
+
+                    var codeAdded = false;
+
+                    codeAdded = ProcessAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
+
+                    source.AppendLinesIndented(0, "}");
+
+                    if (codeAdded)
+                    {
+                        context.AddSource($"{GetClassTypeName(classSymbol, true)}.AddedFunctions.g.cs", source.ToString());
+                    }
                 }
             }
             catch (Exception exception)
@@ -79,13 +91,11 @@ internal class SourceGenerator : ISourceGenerator
     {
         var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName(attributeName)}").FirstOrDefault();
         INamedTypeSymbol attributeSymbol = compilation.GetTypeByMetadataName($"ContentSecurityPolicy.AspNetCore.{GetLongAttributeName(attributeName)}");
+        var attributeData = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == attributeSymbol.Name).FirstOrDefault();
 
-        if (classSymbol.GetAttributes().Any(ad => ad.AttributeClass.Name == attributeSymbol.Name))
+        if (attributeData != default)
         {
-            var attributeData = classSymbol.GetAttributes().SingleOrDefault(ad => ad.AttributeClass.Equals(attributeSymbol, SymbolEqualityComparer.Default));
-
-            var functionName = attributeData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "FunctionName").Value;
-            var policyValue = attributeData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PolicyValue").Value;
+            var policyValue = (attribute.AttributeClass.GetMembers().Where(x => x.Name == "PolicyValue").FirstOrDefault() as IFieldSymbol).ConstantValue;
 
             if (codeAdded)
             {
@@ -97,9 +107,9 @@ internal class SourceGenerator : ISourceGenerator
             source.AppendLinesIndented(1, $"/// Adds {policyValue} to the policy.");
             source.AppendLinesIndented(1, $"/// </summary>");
             source.AppendLinesIndented(1, $"/// <returns></returns>");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {functionName}()");
+            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}()");
             source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, $"AddValue({policyValue})");
+            source.AppendLinesIndented(2, $"AddValue(\"{policyValue}\");");
             source.AppendLinesIndented(2, "return this;");
             source.AppendLinesIndented(1, "}");
 
@@ -151,6 +161,18 @@ internal class SourceGenerator : ISourceGenerator
         }
 
         return classSymbol.ConstructedFrom.ToString().Substring(classSymbol.ConstructedFrom.ToString().IndexOf(classSymbol.Name));
+    }
+
+
+    public static string GetClassBaseTypeName(INamedTypeSymbol classSymbol)
+    {
+        if (classSymbol.BaseType.ToString() == "object")
+        {
+            return "";
+        }
+
+        var namespacePrefix = classSymbol.BaseType.ToString().Substring(0, classSymbol.BaseType.ToString().IndexOf(classSymbol.BaseType.Name));
+        return classSymbol.BaseType.ToString().Replace(namespacePrefix, "");
     }
 
 

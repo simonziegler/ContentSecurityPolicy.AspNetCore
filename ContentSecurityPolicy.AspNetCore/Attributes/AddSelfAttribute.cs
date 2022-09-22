@@ -4,12 +4,11 @@
 /// <summary>
 /// Creates an <c>AddSelf()</c> generated function.
 /// </summary>
-public sealed class AddSelfAttribute : PolicyBaseAttribute
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+public sealed class AddSelfAttribute : Attribute
 {
-    /// <inheritdoc/>
-    public override string FunctionName => "AddSelf";
-
-
-    /// <inheritdoc/>
-    public override string PolicyValue => "'self'";
+    /// <summary>
+    /// The policy value.
+    /// </summary>
+    internal const string PolicyValue = "'self'";
 }

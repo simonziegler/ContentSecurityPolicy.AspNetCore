@@ -1,4 +1,4 @@
-﻿namespace ContentSecurityPolicy.AspNetCore.BaseUriPolicy;
+﻿namespace ContentSecurityPolicy.AspNetCore;
 
 
 /// <summary>
