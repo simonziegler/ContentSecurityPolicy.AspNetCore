@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// require-trusted-types-for policy - considered deprecated.
+/// require-trusted-types-for policy.
 /// </summary>
 [PolicyOptions]
 [AddScript]
@@ -12,7 +12,7 @@ public sealed partial class RequireTrustedTypesForPolicyOptions : PolicyOptionsB
 
 
 /// <summary>
-/// require-trusted-types-for policy - considered deprecated.
+/// require-trusted-types-for policy.
 /// </summary>
 [Policy("require-trusted-types-for")]
 public sealed partial class RequireTrustedTypesForPolicy : PolicyBase
