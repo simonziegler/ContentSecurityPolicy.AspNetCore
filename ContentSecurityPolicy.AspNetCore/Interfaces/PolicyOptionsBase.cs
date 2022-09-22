@@ -1,7 +1,7 @@
 ﻿namespace ContentSecurityPolicy.AspNetCore;
 
 /// <summary>
-/// Base interface for a policy.
+/// All policies inherit from this base class.
 /// </summary>
 public abstract class PolicyOptionsBase : IPolicyOptions<PolicyOptionsBase>
 {
