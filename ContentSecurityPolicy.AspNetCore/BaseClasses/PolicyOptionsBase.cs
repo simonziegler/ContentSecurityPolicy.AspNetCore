@@ -8,7 +8,7 @@ public abstract class PolicyOptionsBase
     /// <summary>
     /// The policy's name.
     /// </summary>
-    private protected readonly List<string> PolicyValues = new();
+    internal readonly List<string> PolicyValues = new();
 
 
     ///// <summary>

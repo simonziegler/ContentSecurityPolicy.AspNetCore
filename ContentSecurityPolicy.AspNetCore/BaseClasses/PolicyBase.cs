@@ -3,7 +3,7 @@
 /// <summary>
 /// Base interface for a policy.
 /// </summary>
-internal abstract class PolicyBase
+public abstract class PolicyBase
 {
     /// <summary>
     /// The policy's name.
@@ -12,27 +12,11 @@ internal abstract class PolicyBase
 
 
     /// <summary>
-    /// The policy's name.
-    /// </summary>
-    private readonly List<string> PolicyValues = new();
-
-
-    /// <summary>
-    /// Returns the full policy string.
+    /// Returns the full policy value string.
     /// </summary>
     /// <returns></returns>
-    public string GetPolicy()
-    {
-        return $"{PolicyName}: {string.Join(' ', PolicyValues)};";
-    }
-
-
-    /// <summary>
-    /// Adds a value to the policy.
-    /// </summary>
-    /// <param name="value"></param>
-    internal void AddValue(string value)
-    {
-        PolicyValues.Add(value);
-    }
+    public abstract string GetPolicyValue();
+    //{
+    //    return $"{PolicyName}: {string.Join(' ', PolicyValues)};";
+    //}
 }

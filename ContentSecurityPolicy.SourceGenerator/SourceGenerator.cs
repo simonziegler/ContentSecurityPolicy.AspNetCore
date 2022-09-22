@@ -55,13 +55,14 @@ internal class SourceGenerator : ISourceGenerator
                 source.AppendLinesIndented(0, "");
                 source.AppendLinesIndented(0, $"namespace ContentSecurityPolicy.AspNetCore;");
                 source.AppendLinesIndented(0, "");
-                source.AppendLinesIndented(0, $"public sealed partial class {GetClassTypeName(classSymbol)} : PolicyOptionsBase");
+                source.AppendLinesIndented(0, $"public sealed partial class {GetClassTypeName(classSymbol)} : {GetClassBaseTypeName(classSymbol)}");
                 source.AppendLinesIndented(0, "{");
 
                 var codeAdded = false;
 
+                codeAdded = ProcessPolicyAttribute(compilation, classSymbol, codeAdded, source);
                 codeAdded = ProcessPolicyOptionsAttribute(compilation, classSymbol, codeAdded, source);
-                codeAdded = ProcessAdditionalAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
+                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
 
                 source.AppendLinesIndented(0, "}");
 
@@ -82,6 +83,49 @@ internal class SourceGenerator : ISourceGenerator
                     ), classNode.GetLocation()));
             }
         }
+    }
+
+
+    private bool ProcessPolicyAttribute(Compilation compilation, INamedTypeSymbol classSymbol, bool codeAdded, StringBuilder source)
+    {
+        var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"PolicyAttribute").FirstOrDefault();
+
+        if (attribute != default)
+        {
+            var policyName = attribute.ConstructorArguments.FirstOrDefault().Value;
+
+            if (codeAdded)
+            {
+                source.AppendLinesIndented(1, "");
+                source.AppendLinesIndented(1, "");
+            }
+
+            source.AppendLinesIndented(1, "/// <inheritdoc/>");
+            source.AppendLinesIndented(1, $"private protected override string PolicyName => \"{policyName}\";");
+
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)}Options Options {{ get; set; }} = new();");
+
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)}(Action<{GetClassTypeName(classSymbol)}Options> configureOptions)");
+            source.AppendLinesIndented(1, "{");
+            source.AppendLinesIndented(2, "configureOptions.Invoke(Options);");
+            source.AppendLinesIndented(1, "}");
+
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, "");
+            source.AppendLinesIndented(1, "/// <inheritdoc />");
+            source.AppendLinesIndented(1, $"public override string GetPolicyValue()");
+            source.AppendLinesIndented(1, "{");
+            source.AppendLinesIndented(2, "return $\"{PolicyName}: {string.Join(' ', Options.PolicyValues)};\";");
+            source.AppendLinesIndented(1, "}");
+
+            return true;
+        }
+
+        return codeAdded;
     }
 
 
@@ -107,8 +151,8 @@ internal class SourceGenerator : ISourceGenerator
             source.AppendLinesIndented(2, "PolicyValues.Add(value);");
             source.AppendLinesIndented(2, "return this;");
             source.AppendLinesIndented(1, "}");
-            
-            
+
+
             source.AppendLinesIndented(1, "");
             source.AppendLinesIndented(1, "");
 
@@ -130,7 +174,7 @@ internal class SourceGenerator : ISourceGenerator
     }
 
 
-    private bool ProcessAdditionalAttribute(Compilation compilation, INamedTypeSymbol classSymbol, string attributeName, bool codeAdded, StringBuilder source)
+    private bool ProcessAdditionalPolicyOptionsAttribute(Compilation compilation, INamedTypeSymbol classSymbol, string attributeName, bool codeAdded, StringBuilder source)
     {
         var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName(attributeName)}").FirstOrDefault();
 
