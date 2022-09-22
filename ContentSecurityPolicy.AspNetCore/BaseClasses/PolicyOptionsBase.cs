@@ -11,14 +11,8 @@ public abstract class PolicyOptionsBase
     internal readonly List<string> PolicyValues = new();
 
 
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    ///// <param name="value"></param>
-    ///// <returns></returns>
-    //public PolicyOptionsBase AddValue(string value)
-    //{
-    //    PolicyValues.Add(value);
-    //    return this;
-    //}
+    /// <summary>
+    /// The nonce value.
+    /// </summary>
+    private protected string NonceValue { get; init; } = "";
 }

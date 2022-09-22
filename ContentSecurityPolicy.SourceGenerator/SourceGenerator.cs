@@ -26,6 +26,10 @@ internal class SourceGenerator : ISourceGenerator
         context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
     }
 
+
+    private readonly string[] _policyOptionAdditionalAttributes = { "AddNone", "AddReportSample", "AddSelf", "AddStrictDynamic", "AddUnsafeEval", "AddUnsafeHashes", "AddUnsafeInline" };
+
+
     public void Execute(GeneratorExecutionContext context)
     {
         Extensions.LinesGenerated = 0;
@@ -60,17 +64,14 @@ internal class SourceGenerator : ISourceGenerator
 
                 var codeAdded = false;
 
-                codeAdded = ProcessPolicyAttribute(compilation, classSymbol, codeAdded, source);
-                
-                codeAdded = ProcessPolicyOptionsAttribute(compilation, classSymbol, codeAdded, source);
+                codeAdded = ProcessPolicyAttribute(classSymbol, source, codeAdded);
 
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddNone", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddReportSample", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddSelf", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddStrictDynamic", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeEval", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeHashes", codeAdded, source);
-                codeAdded = ProcessAdditionalPolicyOptionsAttribute(compilation, classSymbol, "AddUnsafeInline", codeAdded, source);
+                codeAdded = ProcessPolicyOptionsAttribute(classSymbol, source, codeAdded);
+
+                foreach (var additionalAtributeName in _policyOptionAdditionalAttributes)
+                {
+                    codeAdded = ProcessAdditionalPolicyOptionsAttribute(classSymbol, additionalAtributeName, source, codeAdded);
+                }
 
                 source.AppendLinesIndented(0, "}");
 
@@ -94,135 +95,127 @@ internal class SourceGenerator : ISourceGenerator
     }
 
 
-    private bool ProcessPolicyAttribute(Compilation compilation, INamedTypeSymbol classSymbol, bool codeAdded, StringBuilder source)
+    private bool ProcessPolicyAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
     {
         var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"PolicyAttribute").FirstOrDefault();
 
-        if (attribute != default)
+        if (attribute == default)
         {
-            var policyName = attribute.ConstructorArguments.FirstOrDefault().Value;
-
-            if (codeAdded)
-            {
-                source.AppendLinesIndented(1, "");
-                source.AppendLinesIndented(1, "");
-            }
-
-            source.AppendLinesIndented(1, "/// <inheritdoc/>");
-            source.AppendLinesIndented(1, $"private protected override string PolicyName => \"{policyName}\";");
-
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)}Options Options {{ get; set; }} = new();");
-
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)}(Action<{GetClassTypeName(classSymbol)}Options> configureOptions)");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, "configureOptions.Invoke(Options);");
-            source.AppendLinesIndented(1, "}");
-
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "/// <inheritdoc />");
-            source.AppendLinesIndented(1, $"public override string GetPolicyValue()");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, "return $\"{PolicyName}: {string.Join(' ', Options.PolicyValues)};\";");
-            source.AppendLinesIndented(1, "}");
-
-            return true;
+            return codeAdded;
         }
 
-        return codeAdded;
+        var policyName = attribute.ConstructorArguments.FirstOrDefault().Value;
+
+        source.AppendLinesIndented(1, "/// <inheritdoc/>");
+        source.AppendLinesIndented(1, $"private protected override string PolicyName => \"{policyName}\";");
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)}Options Options {{ get; set; }}");
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)}(string nonceValue, Action<{GetClassTypeName(classSymbol)}Options> configureOptions)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "Options = new(nonceValue);");
+        source.AppendLinesIndented(2, "configureOptions.Invoke(Options);");
+        source.AppendLinesIndented(1, "}");
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "/// <inheritdoc />");
+        source.AppendLinesIndented(1, $"public override string GetPolicyValue()");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return $\"{PolicyName} {string.Join(' ', Options.PolicyValues)};\";");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
     }
 
 
-    private bool ProcessPolicyOptionsAttribute(Compilation compilation, INamedTypeSymbol classSymbol, bool codeAdded, StringBuilder source)
+    private bool ProcessPolicyOptionsAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
     {
         var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"PolicyOptionsAttribute").FirstOrDefault();
 
-        if (attribute != default)
+        if (attribute == default)
         {
-            if (codeAdded)
-            {
-                source.AppendLinesIndented(1, "");
-                source.AppendLinesIndented(1, "");
-            }
-
-            source.AppendLinesIndented(1, "/// <summary>");
-            source.AppendLinesIndented(1, "/// Adds a policy value.");
-            source.AppendLinesIndented(1, "/// </summary>");
-            source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
-            source.AppendLinesIndented(1, "/// <returns></returns>");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddValue(string value)");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, "PolicyValues.Add(value);");
-            source.AppendLinesIndented(2, "return this;");
-            source.AppendLinesIndented(1, "}");
-
-
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "");
-
-            source.AppendLinesIndented(1, "/// <summary>");
-            source.AppendLinesIndented(1, "/// Conditionally adds a policy value.");
-            source.AppendLinesIndented(1, "/// </summary>");
-            source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
-            source.AppendLinesIndented(1, "/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the supplied value to the policy</param>");
-            source.AppendLinesIndented(1, "/// <returns></returns>");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddValue(string value, Func<bool> conditionalFunc)");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, "return conditionalFunc.Invoke() ? AddValue(value) : this;");
-            source.AppendLinesIndented(1, "}");
-
-            return true;
+            return codeAdded;
         }
 
-        return codeAdded;
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)}(string nonceValue)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "NonceValue = nonceValue;");
+        source.AppendLinesIndented(1, "}");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, "/// Adds a policy value.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddValue(string value)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "PolicyValues.Add(value);");
+        source.AppendLinesIndented(2, "return this;");
+        source.AppendLinesIndented(1, "}");
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, "/// Conditionally adds a policy value.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
+        source.AppendLinesIndented(1, "/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the supplied value to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddValue(string value, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return conditionalFunc.Invoke() ? AddValue(value) : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
     }
 
 
-    private bool ProcessAdditionalPolicyOptionsAttribute(Compilation compilation, INamedTypeSymbol classSymbol, string attributeName, bool codeAdded, StringBuilder source)
+    private bool ProcessAdditionalPolicyOptionsAttribute(INamedTypeSymbol classSymbol, string attributeName, StringBuilder source, bool codeAdded)
     {
         var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName(attributeName)}").FirstOrDefault();
 
-        if (attribute != default)
+        if (attribute == default)
         {
-            if (codeAdded)
-            {
-                source.AppendLinesIndented(1, "");
-                source.AppendLinesIndented(1, "");
-            }
-
-            var policyValue = (attribute.AttributeClass.GetMembers().Where(x => x.Name == "PolicyValue").FirstOrDefault() as IFieldSymbol).ConstantValue;
-
-            source.AppendLinesIndented(1, "/// <summary>");
-            source.AppendLinesIndented(1, $"/// Adds {policyValue} to the policy.");
-            source.AppendLinesIndented(1, "/// </summary>");
-            source.AppendLinesIndented(1, "/// <returns></returns>");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}()");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, $"return AddValue(\"{policyValue}\");");
-            source.AppendLinesIndented(1, "}");
-
-
-
-            source.AppendLinesIndented(1, "");
-            source.AppendLinesIndented(1, "");
-
-            source.AppendLinesIndented(1, "/// <summary>");
-            source.AppendLinesIndented(1, $"/// Conditionally adds {policyValue} to the policy.");
-            source.AppendLinesIndented(1, "/// </summary>");
-            source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add {policyValue} to the policy</param>");
-            source.AppendLinesIndented(1, "/// <returns></returns>");
-            source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}(Func<bool> conditionalFunc)");
-            source.AppendLinesIndented(1, "{");
-            source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? {attributeName}() : this;");
-            source.AppendLinesIndented(1, "}");
-            return true;
+            return codeAdded;
         }
 
-        return codeAdded;
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        var policyValue = (attribute.AttributeClass.GetMembers().Where(x => x.Name == "PolicyValue").FirstOrDefault() as IFieldSymbol).ConstantValue;
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Adds {policyValue} to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}()");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return AddValue(\"{policyValue}\");");
+        source.AppendLinesIndented(1, "}");
+
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Conditionally adds {policyValue} to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add {policyValue} to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}(Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? {attributeName}() : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
     }
 
 

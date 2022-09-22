@@ -16,7 +16,4 @@ public abstract class PolicyBase
     /// </summary>
     /// <returns></returns>
     public abstract string GetPolicyValue();
-    //{
-    //    return $"{PolicyName}: {string.Join(' ', PolicyValues)};";
-    //}
 }
