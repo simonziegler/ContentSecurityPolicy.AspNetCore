@@ -5,6 +5,7 @@
 /// base-uri policy.
 /// </summary>
 [PolicyOptions]
+[AddHashValue]
 [AddNone]
 [AddNonce]
 [AddReportSample]
