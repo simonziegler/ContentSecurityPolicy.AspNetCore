@@ -27,7 +27,7 @@ internal class SourceGenerator : ISourceGenerator
     }
 
 
-    private readonly string[] _policyOptionAdditionalAttributes = { "AddNone", "AddReportSample", "AddSelf", "AddStrictDynamic", "AddUnsafeEval", "AddUnsafeHashes", "AddUnsafeInline" };
+    private readonly string[] _policyOptionAdditionalAttributes = { "AddNone", "AddReportSample", "AddScript", "AddSelf", "AddStrictDynamic", "AddUnsafeEval", "AddUnsafeHashes", "AddUnsafeInline" };
 
 
     public void Execute(GeneratorExecutionContext context)
@@ -56,6 +56,7 @@ internal class SourceGenerator : ISourceGenerator
                 StringBuilder source = new();
 
                 source.AppendLinesIndented(0, "using System;");
+                source.AppendLinesIndented(0, "using System.Linq;");
                 source.AppendLinesIndented(0, "");
                 source.AppendLinesIndented(0, $"namespace ContentSecurityPolicy.AspNetCore;");
                 source.AppendLinesIndented(0, "");
@@ -77,6 +78,7 @@ internal class SourceGenerator : ISourceGenerator
                 codeAdded = ProcessHashValuePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessHostSourcePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessNoncePolicyOptionsAttribute(classSymbol, source, codeAdded);
+                codeAdded = ProcessPolicyNamePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessSchemeSourcePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessUriPolicyOptionsAttribute(classSymbol, source, codeAdded);
 
@@ -133,7 +135,7 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, "/// <inheritdoc />");
         source.AppendLinesIndented(1, $"public override string GetPolicyValue()");
         source.AppendLinesIndented(1, "{");
-        source.AppendLinesIndented(2, "return $\"{PolicyName} {string.Join(' ', Options.PolicyValues)};\";");
+        source.AppendLinesIndented(2, "return Options.PolicyValues.Any() ? $\"{PolicyName} {string.Join(' ', Options.PolicyValues)};\" : $\"{PolicyName}\";");
         source.AppendLinesIndented(1, "}");
 
         return true;
@@ -382,6 +384,46 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddNonceIf(Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddNonce() : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
+    }
+
+
+    private bool ProcessPolicyNamePolicyOptionsAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
+    {
+        var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName("AddPolicyName")}").FirstOrDefault();
+
+        if (attribute == default)
+        {
+            return codeAdded;
+        }
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Adds a policy name to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddPolicyName(string policyName)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return AddValue(policyName);");
+        source.AppendLinesIndented(1, "}");
+
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Conditionally adds a policy name to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddPolicyNameIf(string policyName, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddPolicyName(policyName) : this;");
         source.AppendLinesIndented(1, "}");
 
         return true;
