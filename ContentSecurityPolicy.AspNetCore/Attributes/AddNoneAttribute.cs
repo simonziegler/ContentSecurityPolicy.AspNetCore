@@ -2,13 +2,13 @@
 
 
 /// <summary>
-/// Creates an <c>AddUnsafeHashes()</c> generated function.
+/// Creates an <c>AddNone()</c> generated function.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-public sealed class AddUnsafeHashesAttribute : Attribute
+public sealed class AddNoneAttribute : Attribute
 {
     /// <summary>
     /// The policy value.
     /// </summary>
-    internal const string PolicyValue = "'unsafe-hashes'";
+    internal const string PolicyValue = "'none'";
 }

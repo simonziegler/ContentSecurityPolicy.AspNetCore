@@ -73,6 +73,8 @@ internal class SourceGenerator : ISourceGenerator
                     codeAdded = ProcessAdditionalPolicyOptionsAttribute(classSymbol, additionalAtributeName, source, codeAdded);
                 }
 
+                codeAdded = ProcessNoncePolicyOptionsAttribute(classSymbol, source, codeAdded);
+
                 source.AppendLinesIndented(0, "}");
 
                 if (codeAdded)
@@ -147,6 +149,8 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(2, "NonceValue = nonceValue;");
         source.AppendLinesIndented(1, "}");
 
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
         source.AppendLinesIndented(1, "/// <summary>");
         source.AppendLinesIndented(1, "/// Adds a policy value.");
         source.AppendLinesIndented(1, "/// </summary>");
@@ -213,6 +217,46 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}(Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? {attributeName}() : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
+    }
+
+
+    private bool ProcessNoncePolicyOptionsAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
+    {
+        var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName("AddNonce")}").FirstOrDefault();
+
+        if (attribute == default)
+        {
+            return codeAdded;
+        }
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Adds a nonce to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddNonce()");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return AddValue($\"'nonce-{NonceValue}'\");");
+        source.AppendLinesIndented(1, "}");
+
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Conditionally adds a nonce to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddNonce(Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddNonce() : this;");
         source.AppendLinesIndented(1, "}");
 
         return true;

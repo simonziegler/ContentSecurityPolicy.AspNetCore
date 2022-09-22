@@ -6,6 +6,7 @@
 /// </summary>
 [PolicyOptions]
 [AddNone]
+[AddNonce]
 [AddReportSample]
 [AddSelf]
 [AddStrictDynamic]
