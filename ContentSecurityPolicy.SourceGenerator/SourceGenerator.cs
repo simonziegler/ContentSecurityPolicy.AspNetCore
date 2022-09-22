@@ -169,21 +169,6 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(2, "return this;");
         source.AppendLinesIndented(1, "}");
 
-
-        source.AppendLinesIndented(1, "");
-        source.AppendLinesIndented(1, "");
-
-        source.AppendLinesIndented(1, "/// <summary>");
-        source.AppendLinesIndented(1, "/// Conditionally adds a policy value.");
-        source.AppendLinesIndented(1, "/// </summary>");
-        source.AppendLinesIndented(1, "/// <param name=\"value\">The value to be added to the policy</param>");
-        source.AppendLinesIndented(1, "/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the supplied value to the policy</param>");
-        source.AppendLinesIndented(1, "/// <returns></returns>");
-        source.AppendLinesIndented(1, $"private {GetClassTypeName(classSymbol)} AddValueIf(string value, Func<bool> conditionalFunc)");
-        source.AppendLinesIndented(1, "{");
-        source.AppendLinesIndented(2, "return conditionalFunc.Invoke() ? AddValue(value) : this;");
-        source.AppendLinesIndented(1, "}");
-
         return true;
     }
 
