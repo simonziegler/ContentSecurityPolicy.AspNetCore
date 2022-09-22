@@ -73,10 +73,12 @@ internal class SourceGenerator : ISourceGenerator
                     codeAdded = ProcessAdditionalPolicyOptionsAttribute(classSymbol, additionalAtributeName, source, codeAdded);
                 }
 
+                codeAdded = ProcessGroupNamePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessHashValuePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessHostSourcePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessNoncePolicyOptionsAttribute(classSymbol, source, codeAdded);
                 codeAdded = ProcessSchemeSourcePolicyOptionsAttribute(classSymbol, source, codeAdded);
+                codeAdded = ProcessUriPolicyOptionsAttribute(classSymbol, source, codeAdded);
 
                 source.AppendLinesIndented(0, "}");
 
@@ -220,6 +222,46 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} {attributeName}If(Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? {attributeName}() : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
+    }
+
+
+    private bool ProcessGroupNamePolicyOptionsAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
+    {
+        var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName("AddGroupName")}").FirstOrDefault();
+
+        if (attribute == default)
+        {
+            return codeAdded;
+        }
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Adds a group name to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddGroupName(string groupName)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return AddValue(groupName);");
+        source.AppendLinesIndented(1, "}");
+
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Conditionally adds a group name to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddGroupNameIf(string groupName, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddGroupName(groupName) : this;");
         source.AppendLinesIndented(1, "}");
 
         return true;
@@ -380,6 +422,46 @@ internal class SourceGenerator : ISourceGenerator
         source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddSchemeSourceIf(SchemeSource schemeSource, Func<bool> conditionalFunc)");
         source.AppendLinesIndented(1, "{");
         source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddSchemeSource(schemeSource) : this;");
+        source.AppendLinesIndented(1, "}");
+
+        return true;
+    }
+
+
+    private bool ProcessUriPolicyOptionsAttribute(INamedTypeSymbol classSymbol, StringBuilder source, bool codeAdded)
+    {
+        var attribute = classSymbol.GetAttributes().Where(ad => ad.AttributeClass.Name == $"{GetLongAttributeName("AddUri")}").FirstOrDefault();
+
+        if (attribute == default)
+        {
+            return codeAdded;
+        }
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Adds a uri to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddUri(string uri)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, "return AddValue(uri);");
+        source.AppendLinesIndented(1, "}");
+
+
+
+        source.AppendLinesIndented(1, "");
+        source.AppendLinesIndented(1, "");
+
+        source.AppendLinesIndented(1, "/// <summary>");
+        source.AppendLinesIndented(1, $"/// Conditionally adds a uri to the policy.");
+        source.AppendLinesIndented(1, "/// </summary>");
+        source.AppendLinesIndented(1, $"/// <param name=\"conditionalFunc\">The conditional function delegate determining whether to add the nonce to the policy</param>");
+        source.AppendLinesIndented(1, "/// <returns></returns>");
+        source.AppendLinesIndented(1, $"public {GetClassTypeName(classSymbol)} AddUriIf(string uri, Func<bool> conditionalFunc)");
+        source.AppendLinesIndented(1, "{");
+        source.AppendLinesIndented(2, $"return conditionalFunc.Invoke() ? AddUri(uri) : this;");
         source.AppendLinesIndented(1, "}");
 
         return true;
